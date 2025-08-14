@@ -2,7 +2,7 @@
 // This script consolidates the functionality that was previously embedded
 // directly inside the HTML pages (index, packages, stars, premium).
 // It handles navigation actions, ripple effects, purchase modals,
-// form submission and the animated particle background.d
+// form submission and the animated particle background.
 
 (() => {
   // Wait until DOM is ready to start attaching listeners and running logic
@@ -148,6 +148,21 @@
       const fileInput     = document.getElementById('orderScreenshot');
       if (usernameInput) usernameInput.value = '';
       if (fileInput)     fileInput.value     = '';
+      // If running inside Telegram WebApp, prefill the username field with the
+      // buyer's Telegram username (if available). This helps ensure that the
+      // message always includes who made the purchase, even if the user
+      // forgets to type their @username manually.  We leave the value empty if
+      // no username is available from Telegram.
+      try {
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        if (tgUser && tgUser.username && usernameInput) {
+          // Prefill with an @ prefix so it's clear to the user.  Our
+          // submission code will strip the @ if present.
+          usernameInput.value = '@' + tgUser.username;
+        }
+      } catch (e) {
+        // Ignore any errors when trying to prefill from Telegram WebApp.
+      }
       // Show modal
       modal?.removeAttribute('hidden');
       // Countdown is triggered after the user clicks the confirm button
@@ -228,6 +243,21 @@
         // Remove leading @ from username if present.  The server will add @
         // back when composing the message.
         let username = usernameInput?.value.trim() || '';
+        // If no username is entered manually, attempt to use the Telegram user
+        // name from the Mini App context.  This allows auto‑filling when the
+        // user runs the app inside Telegram and hasn't typed their @username.
+        if (!username) {
+          try {
+            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+            if (tgUser && tgUser.username) {
+              username = tgUser.username;
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+        // Remove leading @ if present.  We only strip once so that user input
+        // beginning with multiple @ remains intact after the first.
         if (username.startsWith('@')) {
           username = username.slice(1);
         }
