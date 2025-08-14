@@ -2,7 +2,7 @@
 // This script consolidates the functionality that was previously embedded
 // directly inside the HTML pages (index, packages, stars, premium).
 // It handles navigation actions, ripple effects, purchase modals,
-// form submission and the animated particle background.
+// form submission and the animated particle background.d
 
 (() => {
   // Wait until DOM is ready to start attaching listeners and running logic
