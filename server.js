@@ -71,12 +71,27 @@ app.post('/api/order', upload.single('screenshot'), async (req, res) => {
   msg += `⏰ Время покупки: ${purchaseTime}\n`;
   msg += `🎁 Товар: ${item}\n`;
   if (description) msg += `📄 Описание: ${description}\n`;
-  msg += `👤 Покупатель: @${username}`;
-  if (buyerId) msg += ` (ID: ${buyerId})`;
+  // Add buyer information. Only prepend @ when username is provided. If no username
+  // is provided but a buyerId is, show the numeric ID without an @ to avoid
+  // sending a stray @ character in the message.
+  msg += '👤 Покупатель: ';
+  if (username) {
+    msg += `@${username}`;
+    if (buyerId) msg += ` (ID: ${buyerId})`;
+  } else if (buyerId) {
+    msg += `${buyerId}`;
+  }
   msg += '\n';
-  if (recipientUsername) {
-    msg += `🎯 Получатель: @${recipientUsername}`;
-    if (recipientId) msg += ` (ID: ${recipientId})`;
+  // Add recipient information if provided. If only ID is provided, display it
+  // without @. If both username and ID are provided, show both.
+  if (recipientUsername || recipientId) {
+    msg += '🎯 Получатель: ';
+    if (recipientUsername) {
+      msg += `@${recipientUsername}`;
+      if (recipientId) msg += ` (ID: ${recipientId})`;
+    } else {
+      msg += `${recipientId}`;
+    }
     msg += '\n';
   }
   if (amount) msg += `💰 Сумма: ${amount}\n`;
