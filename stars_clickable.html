@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StarUzBot — Покупка звёзд</title>
+  <meta name="description" content="Выберите количество Telegram Stars и оформите покупку. Цены примерные — вы сможете поменять." />
+  <style>
+
+
+
+
+
+    :root{
+      --accent:#6c5ce7;
+      --accent-2:#a29bfe;
+      --bg:#ffffff;
+      --text:#0f1020;
+      --muted:#5b5d72;
+      --ring:rgba(108,92,231,.25);
+      --card:#ffffffF2;
+      --shadow:0 10px 30px rgba(17, 12, 46, .08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+      color:var(--text); background:var(--bg); overflow-x:hidden;
+    }
+    #bg{ position:fixed; inset:0; z-index:-1;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(162,155,254,.18), transparent 60%),
+                  radial-gradient(1000px 700px at 90% 110%, rgba(108,92,231,.10), transparent 60%),
+                  #fff;
+    }
+
+    /* Navbar */
+    .nav{ position:sticky; top:0; z-index:20; backdrop-filter:saturate(140%) blur(10px);
+      background:rgba(255,255,255,.75); border-bottom:1px solid rgba(108,92,231,.12)
+    }
+    .nav-inner{ max-width:1200px; margin:0 auto; padding:12px 18px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .brand{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px;
+      color:var(--text); text-decoration:none; font-size:20px }
+    .brand-badge{ width:28px; height:28px; display:grid; place-items:center; border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; font-size:16px; box-shadow:0 6px 18px var(--ring) }
+
+    /* Page header */
+    .hero{ max-width:1100px; margin:40px auto 16px; padding:0 18px; text-align:center }
+    .title{ font-size:clamp(28px,5.5vw,56px); line-height:1.05; margin:8px 0 8px; font-weight:900;
+      background:linear-gradient(180deg,#2b2c3f,#6c5ce7); -webkit-background-clip:text; background-clip:text; color:transparent }
+    .subtitle{ max-width:780px; margin:0 auto; color:var(--muted); font-size:clamp(15px,2vw,18px) }
+
+    /* Grid */
+    .grid{ max-width:1100px; margin:26px auto 70px; padding:0 18px;
+      display:grid; grid-template-columns: repeat(4, 1fr); gap:16px }
+    @media (max-width:1000px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width:560px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* Cards */
+    .card{ background:var(--card); border:1px solid rgba(108,92,231,.15); border-radius:var(--radius);
+      padding:18px; box-shadow:var(--shadow); transition: transform .25s, box-shadow .25s;
+      transform: translateY(8px) scale(.98); opacity:0; animation: cardIn .6s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes cardIn{ to{ transform: translateY(0) scale(1); opacity:1; } }
+
+    /* Buttons with ripple */
+    .btn{
+      position: relative; width:100%; border:0; padding:12px 16px; border-radius:12px; font-weight:800;
+      cursor:pointer; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff;
+      box-shadow:0 10px 26px var(--ring); transform: translateZ(0);
+      transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; overflow:hidden;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0) scale(0.995); }
+
+    /* override for back button */
+    .btn.btn-ghost.btn-back {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+
+    .btn .ripple{
+      position:absolute; border-radius:50%; transform:scale(0); pointer-events:none; opacity:.6;
+      background:radial-gradient(circle, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 40%, rgba(255,255,255,0) 70%);
+      animation: ripple .6s ease-out forwards;
+    }
+    @keyframes ripple{ to{ transform: scale(18); opacity:0; } }
+
+    /* Modal hide */
+    .modal-overlay[hidden]{ display:none; }
+    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.4); display:grid; place-items:center; z-index:100; }
+    .modal{ background:#fff; padding:24px; border-radius:16px; max-width:360px; width:90%; box-shadow:var(--shadow);
+      display:flex; flex-direction:column; gap:12px;
+    }
+
+
+
+    /* Модалка */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: grid; place-items: center; z-index: 100;
+}
+.modal {
+  background: #fff; padding: 24px; border-radius: 16px;
+  max-width: 360px; width: 90%; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.modal h2 { margin:0; font-size:20px; }
+.modal label { display:flex; flex-direction:column; font-size:14px; }
+.modal input[type="text"], .modal input[type="file"] {
+  margin-top:6px; padding:8px; border:1px solid #ccc; border-radius:8px;
+}
+.modal-btns { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+
+
+    /* ===== Footer Support Button ===== */
+    footer{
+      display:flex; justify-content:center; padding:24px 18px 36px;
+    }
+    .support{
+      display:inline-flex; align-items:center; gap:10px;
+      background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px;
+      padding:12px 18px; border-radius:14px; box-shadow:0 8px 22px var(--ring);
+      border:1px solid rgba(255,255,255,.25);
+    }
+    .support svg{ flex:0 0 auto }
+
+
+  </style>
+</head>
+<body>
+
+  <!-- Модалка заказа -->
+<div id="orderModal" class="modal-overlay" hidden>
+  <div class="modal">
+    <h2>Оформление заказа</h2>
+    <p id="modalText">Вы хотите купить …</p>
+    <label>Ваш Telegram @username:
+      <input type="text" id="orderUsername" placeholder="@ваш_юзернейм">
+    </label>
+    <p>Переведите <b id="modalAmount">… сум</b> на карту <b>7498 2347 9749 8237</b> и загрузите скриншот:</p>
+    <input type="file" id="orderScreenshot" accept="image/*">
+    <div class="modal-btns">
+      <button id="cancelOrder" class="btn btn-ghost">Отмена</button>
+      <button id="confirmOrder" class="btn btn-primary">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+<!-- Старая секция NAVBAR -->
+<header class="nav" role="banner">
+  <div class="nav-inner">
+    <a class="brand" href="index.html" aria-label="На главную">
+      <span class="brand-badge">★</span>
+      <span>StarUzBot</span>
+    </a>
+    <nav aria-label="Навигация">
+      <div class="menu" id="menu">
+        <!-- тут убираем всё, кроме бренда -->
+      </div>
+    </nav>
+  </div>
+</header>
+
+
+  <main>
+    <section class="hero">
+      <h1 class="title">Выберите звёзды</h1>
+      <p class="subtitle">Нажмите «Приобрести» — сейчас покажу тестовый клик. Цены примерные, меняются в HTML.</p>
+      <div style="text-align:center; margin-top:20px;">
+  <button
+class="btn btn-ghost btn-back"onclick="window.location.href='index.html'">← Назад</button>
+
+
+    </section>
+
+    <section class="grid" aria-label="Пакеты звёзд" id="grid">
+      <!-- Каждая карточка с data-атрибутами для удобства вашей логики -->
+      <article class="card" data-stars="50" data-price="19000"><div class="stars"><span class="icon">⭐</span>50</div><div class="price">Цена: 19 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="75" data-price="28000"><div class="stars"><span class="icon">⭐</span>75</div><div class="price">Цена: 28 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="100" data-price="36000"><div class="stars"><span class="icon">⭐</span>100</div><div class="price">Цена: 36 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="150" data-price="54000"><div class="stars"><span class="icon">⭐</span>150</div><div class="price">Цена: 54 000 сум</div><button class="btn buy">Приобрести</button></article>
+
+      <article class="card" data-stars="250" data-price="89000"><div class="stars"><span class="icon">⭐</span>250</div><div class="price">Цена: 89 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="350" data-price="119000"><div class="stars"><span class="icon">⭐</span>350</div><div class="price">Цена: 119 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="500" data-price="169000"><div class="stars"><span class="icon">⭐</span>500</div><div class="price">Цена: 169 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="750" data-price="249000"><div class="stars"><span class="icon">⭐</span>750</div><div class="price">Цена: 249 000 сум</div><button class="btn buy">Приобрести</button></article>
+
+      <article class="card" data-stars="1000" data-price="329000"><div class="stars"><span class="icon">⭐</span>1000</div><div class="price">Цена: 329 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="1500" data-price="479000"><div class="stars"><span class="icon">⭐</span>1500</div><div class="price">Цена: 479 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="2500" data-price="749000"><div class="stars"><span class="icon">⭐</span>2500</div><div class="price">Цена: 749 000 сум</div><button class="btn buy">Приобрести</button></article>
+      <article class="card" data-stars="5000" data-price="1399000"><div class="stars"><span class="icon">⭐</span>5000</div><div class="price">Цена: 1 399 000 сум</div><button class="btn buy">Приобрести</button></article>
+
+    
+    </section>
+  </main>
+
+
+  <footer>
+    <a class="support" href="https://t.me/echohex" target="_blank" rel="noopener">
+      <!-- small telegram-like icon -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M22 2L2.9 10.1c-.9.4-.9 1.7 0 2.1l5.2 2.1 2.1 5.2c.4.9 1.7.9 2.1 0L22 2z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      Поддержка
+    </a>
+  </footer>
+
+
+  <script src="index.js"></script>
+
+</body>
+</html>
